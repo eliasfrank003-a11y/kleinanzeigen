@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Moon, Plus, Sun } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Download, Moon, Plus, Settings, Sun, Upload } from 'lucide-react';
 import { useListings } from '@/hooks/useListings';
 import { useTheme } from '@/hooks/useTheme';
 import { sortListings } from '@/lib/plan';
+import type { Listing } from '@/lib/types';
 import { defaultPhases, uid } from '@/lib/seed';
 import { ListingCard } from '@/components/ListingCard';
 import { Sheet, fieldClass, labelClass } from '@/components/Sheet';
@@ -11,6 +12,7 @@ export default function App() {
   const store = useListings();
   const { dark, toggle } = useTheme();
   const [adding, setAdding] = useState(false);
+  const [settings, setSettings] = useState(false);
   const [selling, setSelling] = useState<string | null>(null);
 
   // Phases fall due at a date, not on a render, so the clock has to advance on
@@ -41,22 +43,13 @@ export default function App() {
                 : `${open} ${open === 1 ? 'Anzeige' : 'Anzeigen'} offen`}
             </p>
           </div>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={toggle}
-              className="-m-1 p-2 text-muted-foreground"
-              aria-label="Hell oder dunkel"
-            >
-              {dark ? <Sun size={19} /> : <Moon size={19} />}
-            </button>
-            <button
-              onClick={() => setAdding(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground active:opacity-80"
-              aria-label="Anzeige hinzufügen"
-            >
-              <Plus size={20} strokeWidth={2.5} />
-            </button>
-          </div>
+          <button
+            onClick={() => setSettings(true)}
+            className="-mr-2 flex h-11 w-11 items-center justify-center text-muted-foreground"
+            aria-label="Einstellungen"
+          >
+            <Settings size={22} />
+          </button>
         </header>
 
         <div>
@@ -83,6 +76,19 @@ export default function App() {
           {ordered.length > 0 && <div className="border-t border-border" />}
         </div>
       </div>
+
+      <SettingsSheet
+        open={settings}
+        onClose={() => setSettings(false)}
+        dark={dark}
+        onToggleTheme={toggle}
+        onAdd={() => {
+          setSettings(false);
+          setAdding(true);
+        }}
+        listings={store.listings}
+        onImport={store.replaceAll}
+      />
 
       <NewListing
         open={adding}
@@ -206,6 +212,102 @@ function SoldSheet({
         >
           Eintragen
         </button>
+      </div>
+    </Sheet>
+  );
+}
+
+function SettingsSheet({
+  open,
+  onClose,
+  dark,
+  onToggleTheme,
+  onAdd,
+  listings,
+  onImport,
+}: {
+  open: boolean;
+  onClose: () => void;
+  dark: boolean;
+  onToggleTheme: () => void;
+  onAdd: () => void;
+  listings: Listing[];
+  onImport: (listings: Listing[]) => void;
+}) {
+  const file = useRef<HTMLInputElement>(null);
+
+  /**
+   * Everything lives in this browser's storage, so a backup is a file the user
+   * keeps. It is not a sync — but it is the difference between a wiped phone
+   * costing an afternoon and costing the whole record.
+   */
+  const exportData = () => {
+    const blob = new Blob([JSON.stringify(listings, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'kleinanzeigen.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <Sheet open={open} title="Einstellungen" onClose={onClose}>
+      <div className="space-y-2">
+        <button
+          onClick={onAdd}
+          className="flex w-full items-center gap-3 rounded-lg bg-primary px-4 py-3.5 text-[16px] font-medium text-primary-foreground active:opacity-80"
+        >
+          <Plus size={18} strokeWidth={2.5} /> Neue Anzeige
+        </button>
+
+        <button
+          onClick={onToggleTheme}
+          className="flex w-full items-center gap-3 rounded-lg border border-border px-4 py-3.5 text-[16px]"
+        >
+          {dark ? <Sun size={18} /> : <Moon size={18} />}
+          {dark ? 'Helles Design' : 'Dunkles Design'}
+        </button>
+
+        <button
+          onClick={exportData}
+          className="flex w-full items-center gap-3 rounded-lg border border-border px-4 py-3.5 text-[16px] text-muted-foreground"
+        >
+          <Download size={18} /> Daten sichern
+        </button>
+
+        <button
+          onClick={() => file.current?.click()}
+          className="flex w-full items-center gap-3 rounded-lg border border-border px-4 py-3.5 text-[16px] text-muted-foreground"
+        >
+          <Upload size={18} /> Sicherung einlesen
+        </button>
+        <input
+          ref={file}
+          type="file"
+          accept="application/json"
+          className="hidden"
+          onChange={async (e) => {
+            const f = e.target.files?.[0];
+            e.target.value = '';
+            if (!f) return;
+            try {
+              const parsed = JSON.parse(await f.text());
+              if (Array.isArray(parsed) && confirm('Sicherung einlesen? Der jetzige Stand wird ersetzt.')) {
+                onImport(parsed);
+                onClose();
+              }
+            } catch {
+              alert('Die Datei ließ sich nicht lesen.');
+            }
+          }}
+        />
+
+        <p className="pt-2 text-[13px] leading-relaxed text-muted-foreground">
+          Alles liegt auf diesem Gerät, ohne Konto und ohne Server. Ein Update der
+          App rührt die Anzeigen nicht an — gelöscht wird nur, wenn du die
+          Website-Daten im Browser löschst.
+        </p>
       </div>
     </Sheet>
   );

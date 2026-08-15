@@ -17,6 +17,8 @@ export function useListings() {
 
     add: useCallback((listing: Listing) => setListings((all) => [listing, ...all]), []),
 
+    replaceAll: useCallback((next: Listing[]) => setListings(next), []),
+
     remove: useCallback(
       (id: string) => setListings((all) => all.filter((l) => l.id !== id)),
       [],
