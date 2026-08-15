@@ -34,8 +34,8 @@ export default function App() {
       <div className="mx-auto max-w-md pb-20 pt-6">
         <header className="mb-7 flex items-center justify-between px-5">
           <div>
-            <h1 className="text-[26px] font-semibold tracking-tight">Kleinanzeigen</h1>
-            <p className="mt-0.5 text-[14px] text-muted-foreground">
+            <h1 className="text-[28px] font-semibold tracking-tight">Kleinanzeigen</h1>
+            <p className="mt-1 text-[15px] text-muted-foreground">
               {open === 0
                 ? 'nichts offen'
                 : `${open} ${open === 1 ? 'Anzeige' : 'Anzeigen'} offen`}
@@ -87,11 +87,10 @@ export default function App() {
       <NewListing
         open={adding}
         onClose={() => setAdding(false)}
-        onCreate={(title, category, price) => {
+        onCreate={(title, price) => {
           store.add({
             id: uid(),
             title,
-            category,
             photo: null,
             createdAt: new Date().toISOString(),
             soldAt: null,
@@ -121,10 +120,9 @@ function NewListing({
 }: {
   open: boolean;
   onClose: () => void;
-  onCreate: (title: string, category: string, price: number) => void;
+  onCreate: (title: string, price: number) => void;
 }) {
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
   const [price, setPrice] = useState('');
 
   const valid = title.trim().length > 0 && Number(price) > 0;
@@ -139,15 +137,6 @@ function NewListing({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="z. B. Citizen Promaster Aqualand"
-          />
-        </div>
-        <div>
-          <label className={labelClass}>Kategorie</label>
-          <input
-            className={fieldClass}
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="z. B. Uhren & Schmuck"
           />
         </div>
         <div>
@@ -167,7 +156,7 @@ function NewListing({
         </div>
         <button
           disabled={!valid}
-          onClick={() => onCreate(title.trim(), category.trim() || 'Ohne Kategorie', Number(price))}
+          onClick={() => onCreate(title.trim(), Number(price))}
           className="w-full rounded-lg bg-primary py-3 text-sm font-medium text-primary-foreground disabled:opacity-40"
         >
           Anlegen

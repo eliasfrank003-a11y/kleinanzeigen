@@ -27,7 +27,6 @@ export function seedListings(): Listing[] {
     {
       id: uid(),
       title: 'Villeroy & Boch Botanica, 23 Teile',
-      category: 'Küche & Esszimmer',
       photo: null,
       createdAt: new Date().toISOString(),
       soldAt: null,

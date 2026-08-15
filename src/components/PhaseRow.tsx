@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Check } from 'lucide-react';
 import type { Listing, Phase, PhaseState } from '@/lib/types';
 import { formatDate, formatDays, formatDaysDative, formatPrice } from '@/lib/format';
-import { daysBetween, progress, ranFor } from '@/lib/plan';
+import { daysBetween, ranFor } from '@/lib/plan';
 
 const DOT: Record<PhaseState, string> = {
   done: 'border-done bg-done',
@@ -11,6 +11,42 @@ const DOT: Record<PhaseState, string> = {
   next: 'border-border bg-background',
   later: 'border-border bg-background',
 };
+
+/**
+ * The rail below a step is one small square per day of its runtime, filled as
+ * each day closes. A continuous bar tells you roughly how far along you are;
+ * counting squares tells you it is Tuesday and you have four left, which is the
+ * thing you actually decide on.
+ *
+ * An overdue step grows past its planned length — the extra squares are the
+ * overrun, drawn in the same amber as the rest of the warning.
+ */
+function ticksFor(
+  state: PhaseState,
+  phase: Phase,
+  elapsed: number,
+  ran: number | null,
+): { total: number; filled: number; tone: string; overrunFrom?: number } {
+  switch (state) {
+    case 'done': {
+      const total = ran ?? phase.days;
+      return { total, filled: total, tone: 'bg-done' };
+    }
+    case 'due':
+      // Everything past the plan is drawn paler, so the overrun stays legible as
+      // an overrun rather than blending into a longer plan.
+      return {
+        total: Math.max(phase.days, elapsed),
+        filled: elapsed,
+        tone: 'bg-due',
+        overrunFrom: phase.days,
+      };
+    case 'running':
+      return { total: phase.days, filled: Math.min(elapsed, phase.days), tone: 'bg-primary' };
+    default:
+      return { total: phase.days, filled: 0, tone: 'bg-primary' };
+  }
+}
 
 export function PhaseRow({
   listing,
@@ -39,28 +75,40 @@ export function PhaseRow({
   const ran = state === 'done' ? ranFor(listing, index) : null;
   const elapsed = phase.startedAt ? daysBetween(phase.startedAt, now) : 0;
   const overdue = state === 'due' ? elapsed - phase.days : 0;
+  const ticks = ticksFor(state, phase, elapsed, ran);
 
   return (
-    <div className="relative flex gap-4 pb-7 last:pb-0">
-      {/* One stroke from this dot to the next, bridging the gap between rows, so
-          the plan reads as a single run of time rather than a list of stubs.
-          The last step draws none — the line has to stop at the end, not trail
-          off past it. */}
-      <div className="relative flex w-3 shrink-0 justify-center pt-[7px]">
+    <div className="relative flex gap-5 pb-7 last:pb-0">
+      {/* Because each day is a square, a step's height is its duration: three
+          weeks is visibly longer on the page than two. */}
+      <div className="flex w-4 shrink-0 flex-col items-center pt-[6px]">
         <span
-          className={`z-10 h-3 w-3 rounded-full border-2 ${DOT[state]} ${
-            state === 'due' ? 'ring-4 ring-due/20' : ''
-          } ${state === 'running' ? 'ring-4 ring-primary/15' : ''}`}
+          className={`h-4 w-4 shrink-0 rounded-full border-2 ${DOT[state]} ${
+            state === 'due' ? 'ring-[6px] ring-due/20' : ''
+          } ${state === 'running' ? 'ring-[6px] ring-primary/15' : ''}`}
         />
-        {!isLast && (
-          <span className="absolute -bottom-7 left-1/2 top-[22px] w-px -translate-x-1/2 bg-border" aria-hidden />
+        {!isLast && ticks.total > 0 && (
+          <span className="mt-2.5 flex flex-col gap-[3px]" aria-hidden>
+            {Array.from({ length: ticks.total }, (_, i) => (
+              <span
+                key={i}
+                className={`h-[7px] w-[7px] rounded-[2px] ${
+                  i >= ticks.filled
+                    ? 'bg-track'
+                    : ticks.overrunFrom !== undefined && i >= ticks.overrunFrom
+                      ? 'bg-due/50'
+                      : ticks.tone
+                }`}
+              />
+            ))}
+          </span>
         )}
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-4">
           <button
-            className={`text-left text-[17px] leading-snug ${
+            className={`text-left text-[20px] leading-snug ${
               ahead || state === 'done' ? 'text-muted-foreground' : 'text-foreground'
             }`}
             onClick={() => ahead && setEditing((v) => !v)}
@@ -68,7 +116,7 @@ export function PhaseRow({
             {phase.action}
           </button>
           <span
-            className={`tnum shrink-0 text-[17px] ${
+            className={`tnum shrink-0 text-[20px] ${
               ahead || state === 'done' ? 'text-muted-foreground' : 'text-foreground'
             }`}
           >
@@ -76,7 +124,7 @@ export function PhaseRow({
           </span>
         </div>
 
-        <div className="tnum mt-1 text-[13px] text-muted-foreground">
+        <div className="tnum mt-1.5 text-[15px] text-muted-foreground">
           {state === 'done' && phase.startedAt && (
             <>
               seit {formatDate(phase.startedAt)}
@@ -99,17 +147,8 @@ export function PhaseRow({
           {ahead && (phase.days ? formatDays(phase.days) : 'letzter Schritt')}
         </div>
 
-        {(state === 'running' || state === 'due') && phase.days > 0 && (
-          <div className="mt-3 h-[3px] w-full overflow-hidden rounded-full bg-track">
-            <div
-              className={`h-full rounded-full ${state === 'due' ? 'bg-due' : 'bg-primary'}`}
-              style={{ width: `${Math.min(100, Math.max(2, progress(phase, now) * 100))}%` }}
-            />
-          </div>
-        )}
-
         {state === 'due' && (
-          <p className="mt-3 text-[13px] text-due">
+          <p className="mt-2 text-[15px] text-due">
             {overdue > 0 ? `seit ${formatDaysDative(overdue)} fällig` : 'jetzt fällig'}
           </p>
         )}
@@ -120,9 +159,9 @@ export function PhaseRow({
         {state === 'next' && owed && (
           <button
             onClick={onStart}
-            className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-[15px] font-medium text-primary-foreground active:opacity-80"
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-[16px] font-medium text-primary-foreground active:opacity-80"
           >
-            <Check size={15} strokeWidth={3} />
+            <Check size={16} strokeWidth={3} />
             erledigt
           </button>
         )}
@@ -141,7 +180,7 @@ export function PhaseRow({
             />
             <button
               onClick={() => onEdit({ priceType: phase.priceType === 'VB' ? 'FP' : 'VB' })}
-              className="rounded-lg border border-border px-3 py-2 text-[15px] text-muted-foreground"
+              className="rounded-lg border border-border px-3 py-2 text-[16px] text-muted-foreground"
             >
               {phase.priceType === 'VB' ? 'VB' : 'Festpreis'}
             </button>
@@ -152,7 +191,7 @@ export function PhaseRow({
               onChange={(e) => onEdit({ days: Math.max(0, Number(e.target.value)) })}
               className="tnum w-20 rounded-lg border border-border bg-background px-3 py-2 outline-none focus:border-primary"
             />
-            <span className="text-[15px] text-muted-foreground">Tage</span>
+            <span className="text-[16px] text-muted-foreground">Tage</span>
           </div>
         )}
       </div>

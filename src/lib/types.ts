@@ -17,7 +17,6 @@ export interface Phase {
 export interface Listing {
   id: string;
   title: string;
-  category: string;
   /** Data URL. Kept small on the way in — see compressImage. */
   photo: string | null;
   createdAt: string;

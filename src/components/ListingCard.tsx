@@ -56,21 +56,21 @@ export function ListingCard({
 
   return (
     <article
-      className={`border-t border-border px-5 py-8 ${sold ? 'opacity-50' : ''} ${
+      className={`border-t border-border px-5 py-9 ${sold ? 'opacity-50' : ''} ${
         due ? 'bg-card' : ''
       }`}
     >
       <header className="flex gap-4">
         <button
           onClick={() => file.current?.click()}
-          className="h-[84px] w-[84px] shrink-0 overflow-hidden rounded-xl bg-muted"
+          className="h-[92px] w-[92px] shrink-0 overflow-hidden rounded-xl bg-muted"
           aria-label="Foto wählen"
         >
           {listing.photo ? (
             <img src={listing.photo} alt="" className="h-full w-full object-cover" />
           ) : (
             <span className="flex h-full w-full items-center justify-center text-muted-foreground">
-              <Camera size={20} />
+              <Camera size={22} />
             </span>
           )}
         </button>
@@ -87,8 +87,7 @@ export function ListingCard({
         />
 
         <div className="min-w-0 flex-1">
-          <h2 className="text-[19px] font-medium leading-tight">{listing.title}</h2>
-          <p className="mt-1 text-[13px] text-muted-foreground">{listing.category}</p>
+          <h2 className="text-[21px] font-medium leading-tight">{listing.title}</h2>
         </div>
 
         <button
@@ -96,25 +95,25 @@ export function ListingCard({
           className="-mr-2 -mt-1 flex h-9 w-9 shrink-0 items-center justify-center text-muted-foreground"
           aria-label="Mehr"
         >
-          <MoreHorizontal size={18} />
+          <MoreHorizontal size={20} />
         </button>
       </header>
 
       <p className="mt-5 flex items-baseline gap-3">
-        <span className="tnum text-[38px] font-semibold leading-none">
+        <span className="tnum text-[40px] font-semibold leading-none">
           {sold
             ? listing.soldPrice !== null
               ? `${listing.soldPrice} €`
               : '—'
             : formatPrice(current?.price ?? listing.phases[0].price, current?.priceType ?? 'VB')}
         </span>
-        <span className={`text-[14px] ${due ? 'text-due' : 'text-muted-foreground'}`}>
+        <span className={`text-[16px] ${due ? 'text-due' : 'text-muted-foreground'}`}>
           {status}
         </span>
       </p>
 
       {menu && (
-        <div className="mt-5 flex flex-wrap gap-2 text-[14px]">
+        <div className="mt-5 flex flex-wrap gap-2 text-[15px]">
           {active >= 0 && !sold && (
             <button
               onClick={() => {
@@ -167,7 +166,7 @@ export function ListingCard({
         })}
       </div>
 
-      <div className="mt-7 flex items-center justify-between text-[13px]">
+      <div className="mt-8 flex items-center justify-between text-[15px]">
         <span className="text-muted-foreground">
           {sold
             ? age !== null
