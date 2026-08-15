@@ -31,11 +31,11 @@ export default function App() {
 
   return (
     <div className="app-scroll">
-      <div className="mx-auto max-w-md px-4 pb-16 pt-5">
-        <header className="mb-5 flex items-center justify-between">
+      <div className="mx-auto max-w-md pb-20 pt-6">
+        <header className="mb-7 flex items-center justify-between px-5">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">Kleinanzeigen</h1>
-            <p className="text-[11px] text-muted-foreground">
+            <h1 className="text-[26px] font-semibold tracking-tight">Kleinanzeigen</h1>
+            <p className="mt-0.5 text-[14px] text-muted-foreground">
               {open === 0
                 ? 'nichts offen'
                 : `${open} ${open === 1 ? 'Anzeige' : 'Anzeigen'} offen`}
@@ -47,19 +47,19 @@ export default function App() {
               className="-m-1 p-2 text-muted-foreground"
               aria-label="Hell oder dunkel"
             >
-              {dark ? <Sun size={17} /> : <Moon size={17} />}
+              {dark ? <Sun size={19} /> : <Moon size={19} />}
             </button>
             <button
               onClick={() => setAdding(true)}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground active:opacity-80"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground active:opacity-80"
               aria-label="Anzeige hinzufügen"
             >
-              <Plus size={18} strokeWidth={2.5} />
+              <Plus size={20} strokeWidth={2.5} />
             </button>
           </div>
         </header>
 
-        <div className="space-y-3">
+        <div>
           {ordered.map((listing) => (
             <ListingCard
               key={listing.id}
@@ -76,10 +76,11 @@ export default function App() {
           ))}
 
           {ordered.length === 0 && (
-            <p className="rounded-lg border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
+            <p className="border-t border-border px-5 py-16 text-center text-[15px] text-muted-foreground">
               Noch nichts drin. Oben rechts anlegen.
             </p>
           )}
+          {ordered.length > 0 && <div className="border-t border-border" />}
         </div>
       </div>
 
@@ -130,7 +131,7 @@ function NewListing({
 
   return (
     <Sheet open={open} title="Neue Anzeige" onClose={onClose}>
-      <div className="space-y-3">
+      <div>
         <div>
           <label className={labelClass}>Was verkaufst du</label>
           <input
@@ -189,7 +190,7 @@ function SoldSheet({
 
   return (
     <Sheet open={open} title="Verkauft" onClose={onClose}>
-      <div className="space-y-3">
+      <div>
         <div>
           <label className={labelClass}>Für wie viel ist es weggegangen?</label>
           <input

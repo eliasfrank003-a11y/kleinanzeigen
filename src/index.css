@@ -4,43 +4,41 @@
 
 /* Tokens follow sleep-metrics and musical-metrics so the apps read as one
    family. Only the accent differs: piano is blue, sleep bordeaux, this one
-   orange. */
+   orange — and here it is rationed hard, because an accent that marks
+   everything marks nothing. It says "you are here", and nothing else. */
 @layer base {
   :root {
     --background: 210 40% 98%;
     --foreground: 220 20% 10%;
-    --card: 0 0% 100%;
-    --primary: 24 90% 44%; /* orange */
+    /* No cards in this app; the tint sits behind a listing that is running. */
+    --card: 220 20% 96%;
+    --primary: 24 90% 44%;
     --primary-foreground: 0 0% 100%;
     --muted: 220 14% 92%;
-    --muted-foreground: 215 20% 45%;
-    --border: 220 14% 86%;
+    --muted-foreground: 215 18% 48%;
+    --border: 220 14% 88%;
 
-    /* The empty part of a phase's runtime bar. */
-    --track: 220 14% 90%;
-    /* A phase whose days are up and which is waiting on a decision. Amber
-       rather than red: nothing has gone wrong, something is merely owed. */
-    --due: 38 92% 44%;
-    /* Phases already behind you. Deliberately close to muted — the history is
-       there to be glanced at, not read. */
-    --done: 215 16% 52%;
+    --track: 220 14% 88%;
+    /* A step whose days are up. Amber rather than red: nothing has gone wrong,
+       something is merely owed. */
+    --due: 38 92% 42%;
+    --done: 215 16% 62%;
   }
 
-  /* Dark is the default; applied as a class so the toggle controls it. */
   .dark {
     --background: 0 0% 0%;
     --foreground: 0 0% 100%;
-    --card: 0 0% 5%;
+    --card: 0 0% 6%;
     --primary: 24 94% 52%;
     --primary-foreground: 0 0% 100%;
     --muted: 0 0% 10%;
-    --muted-foreground: 212 18% 54%;
-    --border: 0 0% 15%;
+    --muted-foreground: 215 14% 52%;
+    --border: 0 0% 14%;
 
-    --track: 0 0% 13%;
-    /* Lifted for black: at 44% lightness amber goes muddy on a pure black page. */
+    --track: 0 0% 15%;
+    /* Lifted for black: at 42% lightness amber goes muddy on a pure black page. */
     --due: 40 96% 56%;
-    --done: 215 14% 46%;
+    --done: 215 12% 38%;
   }
 
   html,
@@ -71,7 +69,6 @@
     height: 100%;
   }
 
-  /* The one scrolling element, with its indicator suppressed. */
   .app-scroll {
     height: 100%;
     overflow-y: auto;
@@ -86,6 +83,13 @@
     display: none;
     width: 0;
     height: 0;
+  }
+
+  /* Headline numerals: a price is the biggest thing on the screen and the
+     proportional zero in the UI face looks accidental at that size. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
   }
 
   /* iOS zooms the page when a font-size below 16px gets focus. */
