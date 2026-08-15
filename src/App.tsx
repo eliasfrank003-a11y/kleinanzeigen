@@ -35,14 +35,13 @@ export default function App() {
     <div className="app-scroll">
       <div className="mx-auto max-w-md pb-20 pt-6">
         <header className="mb-7 flex items-center justify-between px-5">
-          <div>
-            <h1 className="text-[28px] font-semibold tracking-tight">Kleinanzeigen</h1>
-            <p className="mt-1 text-[15px] text-muted-foreground">
-              {open === 0
-                ? 'nichts offen'
-                : `${open} ${open === 1 ? 'Anzeige' : 'Anzeigen'} offen`}
-            </p>
-          </div>
+          {/* The app's name is on the home screen icon already; the count is
+              the only thing worth the top line. */}
+          <h1 className="text-[28px] font-semibold tracking-tight">
+            {open === 0
+              ? 'Nichts offen'
+              : `${open} ${open === 1 ? 'Anzeige' : 'Anzeigen'} offen`}
+          </h1>
           <button
             onClick={() => setSettings(true)}
             className="-mr-2 flex h-11 w-11 items-center justify-center text-muted-foreground"
