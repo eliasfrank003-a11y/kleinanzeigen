@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="de" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/kleinanzeigen/icon-192.png" />
+    <!-- viewport-fit=cover lets the page paint into the notch/home-indicator area
+         once the browser chrome is gone. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
+    />
+
+    <!-- Launches without Safari's address bar when added to the home screen.
+         iOS reads the apple- prefixed tag; the unprefixed one is the standard. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Kleinanzeigen" />
+    <meta name="theme-color" content="#000000" />
+
+    <link rel="manifest" href="/kleinanzeigen/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/kleinanzeigen/apple-touch-icon.png" />
+
+    <style>
+      html,
+      body,
+      #root {
+        height: 100%;
+      }
+    </style>
+
+    <!-- Runs before the first paint, so a cold start on the home screen never
+         flashes the wrong colour behind the app. It has to set the background on
+         the element itself: the stylesheet's rules live in @layer base and would
+         lose to anything unlayered here anyway. -->
+    <script>
+      (function () {
+        var light = localStorage.getItem('kleinanzeigen:theme') === 'light';
+        document.documentElement.classList.toggle('dark', !light);
+        document.documentElement.style.colorScheme = light ? 'light' : 'dark';
+        document.documentElement.style.backgroundColor = light ? '#f7f9fb' : '#000';
+      })();
+    </script>
+
+    <title>Kleinanzeigen</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

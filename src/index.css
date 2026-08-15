@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tokens follow sleep-metrics and musical-metrics so the apps read as one
+   family. Only the accent differs: piano is blue, sleep bordeaux, this one
+   orange. */
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 220 20% 10%;
+    --card: 0 0% 100%;
+    --primary: 24 90% 44%; /* orange */
+    --primary-foreground: 0 0% 100%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 215 20% 45%;
+    --border: 220 14% 86%;
+
+    /* The empty part of a phase's runtime bar. */
+    --track: 220 14% 90%;
+    /* A phase whose days are up and which is waiting on a decision. Amber
+       rather than red: nothing has gone wrong, something is merely owed. */
+    --due: 38 92% 44%;
+    /* Phases already behind you. Deliberately close to muted — the history is
+       there to be glanced at, not read. */
+    --done: 215 16% 52%;
+  }
+
+  /* Dark is the default; applied as a class so the toggle controls it. */
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --primary: 24 94% 52%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 212 18% 54%;
+    --border: 0 0% 15%;
+
+    --track: 0 0% 13%;
+    /* Lifted for black: at 44% lightness amber goes muddy on a pure black page. */
+    --due: 40 96% 56%;
+    --done: 215 14% 46%;
+  }
+
+  html,
+  body {
+    /* The page itself never scrolls — an inner container does. iOS draws its
+       overlay indicator for the document scroll no matter what CSS asks, but
+       honours the rules on a normal element. */
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: ui-sans-serif, system-ui, -apple-system, 'SF Pro Text', sans-serif;
+    /* Installed on the home screen there is no browser chrome, so the page would
+       otherwise run under the notch and the home indicator. */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  @media (display-mode: standalone) {
+    body {
+      overscroll-behavior-y: none;
+    }
+  }
+
+  #root {
+    height: 100%;
+  }
+
+  /* The one scrolling element, with its indicator suppressed. */
+  .app-scroll {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .app-scroll::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* iOS zooms the page when a font-size below 16px gets focus. */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
