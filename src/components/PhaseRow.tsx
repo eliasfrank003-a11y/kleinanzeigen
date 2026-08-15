@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Check } from 'lucide-react';
 import type { Listing, Phase, PhaseState } from '@/lib/types';
-import { formatDate, formatDays, formatDaysDative, formatPrice } from '@/lib/format';
+import { formatDaysDative, formatPrice } from '@/lib/format';
 import { daysBetween, ranFor } from '@/lib/plan';
 
 const DOT: Record<PhaseState, string> = {
@@ -124,28 +124,23 @@ export function PhaseRow({
           </span>
         </div>
 
-        <div className="tnum mt-1.5 text-[15px] text-muted-foreground">
-          {state === 'done' && phase.startedAt && (
-            <>
-              seit {formatDate(phase.startedAt)}
-              {ran !== null && ` · lief ${formatDays(ran)}`}
-            </>
-          )}
-          {(state === 'running' || state === 'due') && phase.startedAt && (
-            <>
-              seit {formatDate(phase.startedAt)}
-              {phase.days > 0 && (
-                <>
-                  {' · '}
-                  {state === 'due'
-                    ? `${formatDays(phase.days)} geplant`
-                    : `Tag ${elapsed + 1} von ${phase.days}`}
-                </>
-              )}
-            </>
-          )}
-          {ahead && (phase.days ? formatDays(phase.days) : 'letzter Schritt')}
-        </div>
+        {phase.days > 0 && (
+          <div className="tnum mt-1.5 text-[15px] text-muted-foreground">
+            {/* Days done over days planned, in every state — a step that has not
+                started reads 0/14, which says what it is and how long it lasts
+                in three characters. */}
+            {/* The day you are on while it runs, the days it took once it is
+                over, and a plain 0 for a step still ahead. */}
+            {state === 'done'
+              ? (ran ?? phase.days)
+              : state === 'due'
+                ? elapsed
+                : ahead
+                  ? 0
+                  : elapsed + 1}
+            /{phase.days}
+          </div>
+        )}
 
         {state === 'due' && (
           <p className="mt-2 text-[15px] text-due">

@@ -8,11 +8,21 @@ export function load(): Listing[] {
     const raw = localStorage.getItem(KEY);
     if (!raw) return seedListings();
     const parsed = JSON.parse(raw) as Listing[];
-    return Array.isArray(parsed) ? parsed : seedListings();
+    return Array.isArray(parsed) ? parsed.map(migrate) : seedListings();
   } catch {
     // A corrupt store should cost the history, not the app.
     return seedListings();
   }
+}
+
+/** Older stores carry the wordier labels this app started with. */
+function migrate(listing: Listing): Listing {
+  return {
+    ...listing,
+    phases: listing.phases.map((p) =>
+      p.action === 'Verschenken oder spenden' ? { ...p, action: 'Verschenken' } : p,
+    ),
+  };
 }
 
 export function save(listings: Listing[]): void {

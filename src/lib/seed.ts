@@ -17,7 +17,7 @@ export function defaultPhases(start: number): Listing['phases'] {
     { id: uid(), action: 'Anzeige einstellen', price: start, priceType: 'VB', days: 14, startedAt: null },
     { id: uid(), action: 'Neu einstellen', price: step(0.78), priceType: 'VB', days: 14, startedAt: null },
     { id: uid(), action: 'Neu einstellen', price: step(0.55), priceType: 'FP', days: 21, startedAt: null },
-    { id: uid(), action: 'Verschenken oder spenden', price: null, priceType: 'FP', days: 0, startedAt: null },
+    { id: uid(), action: 'Verschenken', price: null, priceType: 'FP', days: 0, startedAt: null },
   ];
 }
 
@@ -35,7 +35,7 @@ export function seedListings(): Listing[] {
         { id: uid(), action: 'Anzeige einstellen', price: 89, priceType: 'VB', days: 14, startedAt: null },
         { id: uid(), action: 'Neu einstellen', price: 69, priceType: 'VB', days: 14, startedAt: null },
         { id: uid(), action: 'Neu einstellen', price: 49, priceType: 'FP', days: 21, startedAt: null },
-        { id: uid(), action: 'Verschenken oder spenden', price: null, priceType: 'FP', days: 0, startedAt: null },
+        { id: uid(), action: 'Verschenken', price: null, priceType: 'FP', days: 0, startedAt: null },
       ],
     },
   ];

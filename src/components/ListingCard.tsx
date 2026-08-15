@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Camera, MoreHorizontal, Trash2, Undo2 } from 'lucide-react';
 import type { Listing, Phase } from '@/lib/types';
-import { activeIndex, ageInDays, currentPhase, daysBetween, phaseState } from '@/lib/plan';
+import { activeIndex, ageInDays, currentPhase, phaseState } from '@/lib/plan';
 import { formatDate, formatDays, formatDaysDative, formatPrice } from '@/lib/format';
 import { compressImage } from '@/lib/storage';
 import { PhaseRow } from './PhaseRow';
@@ -44,15 +44,15 @@ export function ListingCard({
 
   const visible = sold ? listing.phases.filter((p) => p.startedAt) : listing.phases;
 
+  // Only states worth a word. How many days are left is already drawn as
+  // squares and written next to the step; saying it a third time is noise.
   const status = sold
     ? `verkauft am ${formatDate(listing.soldAt!)}`
     : active < 0
       ? 'noch nicht eingestellt'
       : due
         ? 'Aktion fällig'
-        : current?.days && current.startedAt
-          ? `noch ${formatDays(Math.max(0, current.days - daysBetween(current.startedAt, now)))}`
-          : 'letzter Schritt';
+        : '';
 
   return (
     <article
@@ -105,11 +105,14 @@ export function ListingCard({
             ? listing.soldPrice !== null
               ? `${listing.soldPrice} €`
               : '—'
-            : formatPrice(current?.price ?? listing.phases[0].price, current?.priceType ?? 'VB')}
+            : formatPrice(current?.price ?? listing.phases[0].price, current?.priceType ?? 'VB') ||
+              'verschenken'}
         </span>
-        <span className={`text-[16px] ${due ? 'text-due' : 'text-muted-foreground'}`}>
-          {status}
-        </span>
+        {status && (
+          <span className={`text-[16px] ${due ? 'text-due' : 'text-muted-foreground'}`}>
+            {status}
+          </span>
+        )}
       </p>
 
       {menu && (

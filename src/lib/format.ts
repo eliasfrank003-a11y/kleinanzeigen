@@ -5,7 +5,9 @@ export function formatDate(iso: string): string {
 }
 
 export function formatPrice(value: number | null, type: 'VB' | 'FP'): string {
-  if (value === null) return 'zu verschenken';
+  // A step without a price says so in its own label; a second word in the
+  // price column would only repeat it.
+  if (value === null) return '';
   return `${value} €${type === 'VB' ? ' VB' : ''}`;
 }
 
