@@ -44,6 +44,17 @@ export function ListingCard({
 
   const visible = sold ? listing.phases.filter((p) => p.startedAt) : listing.phases;
 
+  // How long it has been up sits with the title rather than at the foot of the
+  // card. It is the number that makes a price feel too high, and as a footnote
+  // under the plan it was read last, if at all.
+  const ageLine = sold
+    ? age !== null
+      ? `${formatDays(age)} bis zum Verkauf`
+      : ''
+    : age !== null
+      ? `online seit ${formatDaysDative(age)}`
+      : 'Plan steht';
+
   // Only states worth a word. How many days are left is already drawn as
   // squares and written next to the step; saying it a third time is noise.
   const status = sold
@@ -88,6 +99,7 @@ export function ListingCard({
 
         <div className="min-w-0 flex-1">
           <h2 className="text-[21px] font-medium leading-tight">{listing.title}</h2>
+          {ageLine && <p className="mt-1.5 text-[15px] text-muted-foreground">{ageLine}</p>}
         </div>
 
         <button
@@ -169,16 +181,7 @@ export function ListingCard({
         })}
       </div>
 
-      <div className="mt-8 flex items-center justify-between text-[15px]">
-        <span className="text-muted-foreground">
-          {sold
-            ? age !== null
-              ? `${formatDays(age)} bis zum Verkauf`
-              : ''
-            : age !== null
-              ? `online seit ${formatDaysDative(age)}`
-              : 'Plan steht'}
-        </span>
+      <div className="mt-8 flex items-center justify-end text-[15px]">
         {sold ? (
           <button onClick={onReopen} className="text-muted-foreground underline">
             zurückholen

@@ -4,14 +4,6 @@ import type { Listing, Phase, PhaseState } from '@/lib/types';
 import { formatDaysDative, formatPrice } from '@/lib/format';
 import { daysBetween, ranFor } from '@/lib/plan';
 
-const DOT: Record<PhaseState, string> = {
-  done: 'border-done bg-done',
-  running: 'border-primary bg-primary',
-  due: 'border-due bg-due',
-  next: 'border-border bg-background',
-  later: 'border-border bg-background',
-};
-
 /**
  * The rail below a step is one small square per day of its runtime, filled as
  * each day closes. A continuous bar tells you roughly how far along you are;
@@ -78,17 +70,17 @@ export function PhaseRow({
   const ticks = ticksFor(state, phase, elapsed, ran);
 
   return (
-    <div className="relative flex gap-5 pb-7 last:pb-0">
+    <div className="relative flex gap-4 pb-7 last:pb-0">
       {/* Because each day is a square, a step's height is its duration: three
-          weeks is visibly longer on the page than two. */}
-      <div className="flex w-4 shrink-0 flex-col items-center pt-[6px]">
-        <span
-          className={`h-4 w-4 shrink-0 rounded-full border-2 ${DOT[state]} ${
-            state === 'due' ? 'ring-[6px] ring-due/20' : ''
-          } ${state === 'running' ? 'ring-[6px] ring-primary/15' : ''}`}
-        />
+          weeks is visibly longer on the page than two.
+
+          There is no marker at the head of a step. The squares carry the state
+          on their own — their colour says running, overdue or done, and the
+          label above them is already lit or dimmed to match — so a dot only
+          repeated it, and dropping it lets the text start nearer the edge. */}
+      <div className="flex w-[7px] shrink-0 flex-col items-center pt-[10px]">
         {!isLast && ticks.total > 0 && (
-          <span className="mt-2.5 flex flex-col gap-[3px]" aria-hidden>
+          <span className="flex flex-col gap-[3px]" aria-hidden>
             {Array.from({ length: ticks.total }, (_, i) => (
               <span
                 key={i}
