@@ -21,22 +21,3 @@ export function defaultPhases(start: number): Listing['phases'] {
   ];
 }
 
-/** The listing this was built for, so the app is never empty on first open. */
-export function seedListings(): Listing[] {
-  return [
-    {
-      id: uid(),
-      title: 'Villeroy & Boch Botanica, 23 Teile',
-      photo: null,
-      createdAt: new Date().toISOString(),
-      soldAt: null,
-      soldPrice: null,
-      phases: [
-        { id: uid(), action: 'Anzeige einstellen', price: 89, priceType: 'VB', days: 14, startedAt: null },
-        { id: uid(), action: 'Neu einstellen', price: 69, priceType: 'VB', days: 14, startedAt: null },
-        { id: uid(), action: 'Neu einstellen', price: 49, priceType: 'FP', days: 21, startedAt: null },
-        { id: uid(), action: 'Verschenken', price: null, priceType: 'FP', days: 0, startedAt: null },
-      ],
-    },
-  ];
-}

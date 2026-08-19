@@ -51,6 +51,13 @@ export default function App() {
           </button>
         </header>
 
+        {store.syncError && (
+          <p className="mb-5 px-5 text-[13px] leading-snug text-muted-foreground">
+            Keine Verbindung zur Datenbank. Was du änderst, wird gesendet, sobald
+            du die App das nächste Mal öffnest.
+          </p>
+        )}
+
         <div>
           {ordered.map((listing) => (
             <ListingCard

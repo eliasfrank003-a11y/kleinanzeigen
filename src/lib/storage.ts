@@ -1,17 +1,22 @@
 import type { Listing } from './types';
-import { seedListings } from './seed';
 
 const KEY = 'kleinanzeigen:listings';
 
+/**
+ * The cache in front of the table, not the record itself. It is what the app
+ * paints on open — instantly, and with no network — and the fetch that follows
+ * replaces it. Empty is a valid answer here: it means the table has not been
+ * read yet on this device.
+ */
 export function load(): Listing[] {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return seedListings();
+    if (!raw) return [];
     const parsed = JSON.parse(raw) as Listing[];
-    return Array.isArray(parsed) ? parsed.map(migrate) : seedListings();
+    return Array.isArray(parsed) ? parsed.map(migrate) : [];
   } catch {
-    // A corrupt store should cost the history, not the app.
-    return seedListings();
+    // A corrupt cache should cost a round trip, not the app.
+    return [];
   }
 }
 
@@ -30,7 +35,7 @@ export function save(listings: Listing[]): void {
     localStorage.setItem(KEY, JSON.stringify(listings));
   } catch {
     // Quota is the only realistic failure and it means a photo was too big.
-    // Losing the write is better than losing the render.
+    // Losing the cache write is cheap now that the table holds the record.
   }
 }
 

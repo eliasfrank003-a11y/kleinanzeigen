@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+#
+# Run SQL against the Supabase project from the terminal, so schema changes
+# don't need a trip to the dashboard.
+#
+#   scripts/db supabase/migrations/0002_lesson_periods.sql   # apply a file
+#   scripts/db -c "select * from lesson_periods"             # one-off query
+#
+# Auth comes from the token `supabase login` already put in the macOS keychain -
+# no secret is stored in this repo, and nothing is passed on the command line
+# where it would land in shell history. That token is admin-level over the whole
+# organisation, which is the trade for not having to click through the dashboard.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+usage() {
+  echo "usage: scripts/db <file.sql> | scripts/db -c \"<sql>\"" >&2
+  exit 64
+}
+
+[ $# -ge 1 ] || usage
+
+case "$1" in
+  -c)
+    [ $# -eq 2 ] || usage
+    sql=$2
+    label="inline query"
+    ;;
+  -*)
+    usage
+    ;;
+  *)
+    [ -f "$1" ] || { echo "no such file: $1" >&2; exit 66; }
+    sql=$(cat "$1")
+    label=$1
+    ;;
+esac
+
+project=$(sed -n 's/^project_id *= *"\(.*\)"/\1/p' supabase/config.toml)
+[ -n "$project" ] || { echo "no project_id in supabase/config.toml" >&2; exit 78; }
+
+token=$(security find-generic-password -s "Supabase CLI" -w 2>/dev/null) || {
+  echo "no Supabase token in the keychain - run: supabase login" >&2
+  exit 77
+}
+
+echo "→ $label → project $project"
+
+# jq builds the payload so that quotes, newlines and backslashes in the SQL
+# survive the trip; hand-rolled string interpolation breaks on the first
+# apostrophe in a comment.
+response=$(jq -n --arg q "$sql" '{query: $q}' | curl -sS \
+  -X POST "https://api.supabase.com/v1/projects/$project/database/query" \
+  -H "Authorization: Bearer $token" \
+  -H "Content-Type: application/json" \
+  --data @-)
+
+# The endpoint answers 200 with a JSON array on success and an object carrying
+# `message` on failure, so the shape is the status.
+if echo "$response" | jq -e 'type == "object" and has("message")' >/dev/null 2>&1; then
+  echo "✗ failed:" >&2
+  echo "$response" | jq -r '.message' >&2
+  exit 1
+fi
+
+rows=$(echo "$response" | jq 'length')
+if [ "$rows" -eq 0 ]; then
+  echo "✓ success, no rows returned"
+else
+  echo "✓ success, $rows row(s):"
+  echo "$response" | jq .
+fi
