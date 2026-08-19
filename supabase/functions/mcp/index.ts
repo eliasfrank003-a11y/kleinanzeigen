@@ -40,7 +40,7 @@ var list_listings_default = defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ includeSold }) => {
     const supabase = sb();
-    let query = supabase.from("listings").select("*").order("created_at", { ascending: false });
+    let query = supabase.from("listings").select("id,title,created_at,phases,sold_at,sold_price").order("created_at", { ascending: false });
     if (!includeSold) query = query.is("sold_at", null);
     const { data, error } = await query;
     if (error) return fail(error.message);
@@ -130,10 +130,11 @@ var update_phase_default = defineTool3({
     days: z3.number().int().min(0).optional(),
     action: z3.string().optional(),
     start: z3.boolean().optional().describe("Stamp this phase as started now. Only true once the new ad is actually online."),
+    startedAt: z3.string().optional().describe("ISO timestamp this phase started, for a re-post that happened on an earlier day. Takes precedence over start."),
     clearStart: z3.boolean().optional().describe("Undo a start stamp that was set by mistake.")
   },
   annotations: { readOnlyHint: false, idempotentHint: false, openWorldHint: false },
-  handler: async ({ listingId, phaseIndex, price, priceType, days, action, start, clearStart }) => {
+  handler: async ({ listingId, phaseIndex, price, priceType, days, action, start, startedAt, clearStart }) => {
     const supabase = sb();
     const { data, error } = await supabase.from("listings").select("phases").eq("id", listingId).single();
     if (error) return fail(error.message);
@@ -149,6 +150,7 @@ var update_phase_default = defineTool3({
         ...days !== void 0 ? { days } : {},
         ...action !== void 0 ? { action } : {},
         ...start ? { startedAt: (/* @__PURE__ */ new Date()).toISOString() } : {},
+        ...startedAt ? { startedAt } : {},
         ...clearStart ? { startedAt: null } : {}
       }
     );

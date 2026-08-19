@@ -18,9 +18,12 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ includeSold }) => {
     const supabase = sb();
+    // Every column except `photo`. The photo is a base64 data URL of some
+    // hundred kilobytes, and an assistant reading this list has no use for the
+    // pixels — pulling them would bury the answer in encoded image.
     let query = supabase
       .from("listings")
-      .select("*")
+      .select("id,title,created_at,phases,sold_at,sold_price")
       .order("created_at", { ascending: false });
     if (!includeSold) query = query.is("sold_at", null);
 

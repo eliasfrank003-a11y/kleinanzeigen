@@ -18,13 +18,17 @@ export default defineTool({
       .boolean()
       .optional()
       .describe("Stamp this phase as started now. Only true once the new ad is actually online."),
+    startedAt: z
+      .string()
+      .optional()
+      .describe("ISO timestamp this phase started, for a re-post that happened on an earlier day. Takes precedence over start."),
     clearStart: z
       .boolean()
       .optional()
       .describe("Undo a start stamp that was set by mistake."),
   },
   annotations: { readOnlyHint: false, idempotentHint: false, openWorldHint: false },
-  handler: async ({ listingId, phaseIndex, price, priceType, days, action, start, clearStart }) => {
+  handler: async ({ listingId, phaseIndex, price, priceType, days, action, start, startedAt, clearStart }) => {
     const supabase = sb();
     const { data, error } = await supabase
       .from("listings")
@@ -48,6 +52,7 @@ export default defineTool({
             ...(days !== undefined ? { days } : {}),
             ...(action !== undefined ? { action } : {}),
             ...(start ? { startedAt: new Date().toISOString() } : {}),
+            ...(startedAt ? { startedAt } : {}),
             ...(clearStart ? { startedAt: null } : {}),
           },
     );
