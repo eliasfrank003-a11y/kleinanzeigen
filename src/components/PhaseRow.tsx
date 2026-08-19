@@ -78,7 +78,12 @@ export function PhaseRow({
           on their own — their colour says running, overdue or done, and the
           label above them is already lit or dimmed to match — so a dot only
           repeated it, and dropping it lets the text start nearer the edge. */}
-      <div className="flex w-[7px] shrink-0 flex-col items-center pt-[10px]">
+      {/* 8px puts the first square's top edge on the cap height of the label
+          beside it, measured rather than guessed: the 20px type sits 2.25px
+          below the top of its 27.5px line box, and its capitals start 4.9px
+          below that again. Anything rounder left the text visibly riding
+          higher than the column. */}
+      <div className="flex w-[7px] shrink-0 flex-col items-center pt-[8px]">
         {!isLast && ticks.total > 0 && (
           <span className="flex flex-col gap-[3px]" aria-hidden>
             {Array.from({ length: ticks.total }, (_, i) => (
